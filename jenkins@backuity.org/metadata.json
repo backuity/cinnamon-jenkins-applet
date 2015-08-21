@@ -2,6 +2,6 @@
     "uuid": "jenkins@backuity.org",
     "name": "Jenkins Builds",
     "description": "View jenkins builds",
-    "icon": "jenkins",
-    "max-instances": "1"
+    "max-instances": "1",
+    "version":"1.0.0"
 }
