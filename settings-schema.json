@@ -1,0 +1,35 @@
+{
+  "refreshInterval":
+  { "type": "spinbutton"
+  , "default": 30
+  , "min": 1
+  , "max": 3600
+  , "units": "seconds"
+  , "step": 5
+  , "description": "Update interval"
+  }
+
+, "sslStrict":
+  { "type": "checkbox"
+  , "default": true
+  , "description": "Validate SSL certificate"
+  }
+
+, "jenkinsUrl": 
+  { "type": "entry"
+  , "default": ""
+  , "description": "Jenkins URL (ex: https://jenkins.mydomain.com)"
+  }
+ 
+, "jenkinsUsername": 
+  { "type": "entry"
+  , "default": ""
+  , "description": "Username (if access is restricted)"
+  }  
+
+, "jenkinsPassword": 
+  { "type": "entry"
+  , "default": ""
+  , "description": "Password (if access is restricted)"
+  }    
+}
