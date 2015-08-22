@@ -129,7 +129,7 @@ MyApplet.prototype = {
 
                     let jobName = job.get_string_member('name');
                     let color = job.get_string_member('color');
-                    let success = color == 'blue';                    
+                    let success = (color == 'blue' || color == 'blue_anime');
                     let url = job.get_string_member('url');  
                     // log("Found job " + jobName + " color=" + color + " success=" + success + " url=" + url)
 
