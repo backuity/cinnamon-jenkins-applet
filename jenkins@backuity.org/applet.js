@@ -111,17 +111,12 @@ MyApplet.prototype = {
             try {
                 let jobs = json.get_array_member('jobs').get_elements();
                 let maxJobs = Math.min(jobs.length,MAX_JOB);
-                let success = 0;
-                for (let i = 0; i < jobs.length; i ++) {
-                    if( jobs[i].get_object().get_string_member('color') == 'blue') {
-                        success += 1;
-                    }
-                }
+                let success = this.countSuccesses(jobs);
                 let failure = jobs.length - success;
 
                 this.updateAppletLabel(failure, success);
 
-                if( success < jobs.length ) {
+                if (success < jobs.length) {
                     this.set_applet_icon_name('jenkins-red');
                 }
 
@@ -130,7 +125,7 @@ MyApplet.prototype = {
 
                     let jobName = job.get_string_member('name');
                     let color = job.get_string_member('color');
-                    let success = (color == 'blue' || color == 'blue_anime');
+                    let success = this.isColorSuccess(color);
                     let url = job.get_string_member('url');  
                     // log("Found job " + jobName + " color=" + color + " success=" + success + " url=" + url)
 
@@ -150,6 +145,22 @@ MyApplet.prototype = {
                 this.refreshBuildStatuses(true)
             }))
         }
+    }
+
+    , countSuccesses: function(jobs) {
+        let success = 0;
+        for (let i = 0; i < jobs.length; i ++) {
+            let color = jobs[i].get_object().get_string_member('color');
+            if (this.isColorSuccess(color)) {
+                success += 1;
+            }
+        }
+        return success;
+    }
+
+    , isColorSuccess: function(color) {
+        return color == 'blue' || 
+               color == 'blue_anime';
     }
 
     , updateAppletLabel: function(failure, success) {
