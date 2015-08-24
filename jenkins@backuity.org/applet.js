@@ -109,8 +109,7 @@ MyApplet.prototype = {
         this.loadJsonAsync(this.jenkinsUrl(), function(json) {  
             this.destroyMenu();          
             try {
-                let jobs = json.get_array_member('jobs').get_elements();                
-                let names = '';
+                let jobs = json.get_array_member('jobs').get_elements();
                 let maxJobs = Math.min(jobs.length,MAX_JOB);
                 let success = 0;
                 for (let i = 0; i < jobs.length; i ++) {
@@ -118,7 +117,9 @@ MyApplet.prototype = {
                         success += 1;
                     }
                 }
-                this.set_applet_label('' + success + '/' + jobs.length);
+                let failure = jobs.length - success;
+
+                this.updateAppletLabel(failure, success);
 
                 if( success < jobs.length ) {
                     this.set_applet_icon_name('jenkins-red');
@@ -149,6 +150,27 @@ MyApplet.prototype = {
                 this.refreshBuildStatuses(true)
             }))
         }
+    }
+
+    , updateAppletLabel: function(failure, success) {
+        let appletLabel = '';
+        let appletTooltip = '';
+
+        if( failure > 0 ) {
+            appletLabel += failure + '\u2717'
+            appletTooltip += failure + " failing jobs"
+        }
+        if( success > 0 && failure > 0 ) {
+            appletLabel += ' '
+            appletTooltip += ' / '
+        }
+        if( success > 0 ) {
+            appletLabel += success + '\u2713'
+            appletTooltip += success + " successful jobs"
+        }
+
+        this.set_applet_label(appletLabel);
+        this.set_applet_tooltip(appletTooltip);
     }
 
     , destroyMenu: function() {
@@ -228,5 +250,3 @@ function logError(error) {
 function main(metadata, orientation, panel_height, instance_id) {
     return new MyApplet(metadata, orientation, panel_height, instance_id);
 }
-
-
