@@ -17,7 +17,6 @@ const St = imports.gi.St
 const Soup = imports.gi.Soup
 
 const UUID = "jenkins@backuity.org"
-const MAX_JOB = 15
 
 
 // Settings keys
@@ -28,9 +27,13 @@ const JENKINS_SSL_STRICT = 'sslStrict'
 const JENKINS_URL = 'jenkinsUrl'
 const JENKINS_USERNAME = 'jenkinsUsername'
 const JENKINS_PASSWORD = 'jenkinsPassword'
+const JENKINS_MAX_NUMBER_OF_JOBS = 'maxNumberOfJobs'
+const JENKINS_HIDE_SUCCESSFUL_JOBS = 'hideSuccessfulJobs'
 
 const KEYS = [
   JENKINS_REFRESH_INTERVAL,
+  JENKINS_MAX_NUMBER_OF_JOBS,
+  JENKINS_HIDE_SUCCESSFUL_JOBS,
   JENKINS_SSL_STRICT,
   JENKINS_URL,
   JENKINS_USERNAME,
@@ -72,7 +75,7 @@ MyApplet.prototype = {
         // http auth if needed
         //----------------------------------
 
-        let applet = this        
+        let applet = this;
         _httpSession.connect("authenticate",function(session,message,auth,retrying) {
             log("Authenticating with " + applet._jenkinsUsername);
             auth.authenticate(applet._jenkinsUsername, applet._jenkinsPassword);
@@ -81,10 +84,9 @@ MyApplet.prototype = {
         // PopupMenu
         //----------------------------------
 
-        this.menuManager = new PopupMenu.PopupMenuManager(this)
-        this.menu = new Applet.AppletPopupMenu(this, orientation)
-        // this.menu.actor.add_style_class_name(STYLE_WEATHER_MENU)
-        this.menuManager.addMenu(this.menu)
+        this.menuManager = new PopupMenu.PopupMenuManager(this);
+        this.menu = new Applet.AppletPopupMenu(this, orientation);
+        this.menuManager.addMenu(this.menu);
 
         this.menu.addMenuItem(new PopupMenu.PopupMenuItem(_('Loading jobs...')));
 
@@ -106,37 +108,46 @@ MyApplet.prototype = {
 
     , refreshBuildStatuses: function(recurse) {
         log("Loading " + this.jenkinsUrl());
+        let applet = this;
         this.loadJsonAsync(this.jenkinsUrl(), function(json) {  
-            this.destroyMenu();          
+            applet.destroyMenu();          
             try {
+                let maxJobConfig = applet._maxNumberOfJobs;
+                let hideSuccessfulJobs = applet._hideSuccessfulJobs;
                 let jobs = json.get_array_member('jobs').get_elements();
-                let maxJobs = Math.min(jobs.length,MAX_JOB);
-                let success = this.countSuccesses(jobs);
+                let maxJobs = Math.min(jobs.length, maxJobConfig);
+                let success = applet.countSuccesses(jobs);
                 let failure = jobs.length - success;
 
-                this.updateAppletLabel(failure, success);
+                applet.updateAppletLabel(failure, success);
 
                 if (success < jobs.length) {
-                    this.set_applet_icon_name('jenkins-red');
+                    applet.set_applet_icon_name('jenkins-red');
                 }
 
-                for (let i = 0; i < maxJobs; i ++) {                                        
+                let displayedJobs = 0;
+                for (let i = 0; i < jobs.length && displayedJobs <= maxJobs; i++) {
                     let job = jobs[i].get_object();
 
-                    let jobName = job.get_string_member('name');
                     let color = job.get_string_member('color');
-                    let success = this.isColorSuccess(color);
-                    let url = job.get_string_member('url');  
-                    // log("Found job " + jobName + " color=" + color + " success=" + success + " url=" + url)
+                    let success = applet.isColorSuccess(color);
 
-                    this.menu.addMenuItem(new JobMenuItem(jobName, success, url));                    
+                    if (success && hideSuccessfulJobs) {
+                        continue;
+                    }
+
+                    let jobName = job.get_string_member('name');
+                    let url = job.get_string_member('url');  
+
+                    applet.menu.addMenuItem(new JobMenuItem(jobName, success, url));
+                    displayedJobs++;
                 }
                 
             } catch(error) {
-                this.set_applet_icon_name('jenkins-grey');
-                this.set_applet_label('!');                                
+                applet.set_applet_icon_name('jenkins-grey');
+                applet.set_applet_label('!');                                
                 logError(error.message)
-                this.menu.addMenuItem(new PopupMenu.PopupMenuItem(error.message));
+                applet.menu.addMenuItem(new PopupMenu.PopupMenuItem(error.message));
             }
         })
 
