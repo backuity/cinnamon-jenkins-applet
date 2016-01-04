@@ -9,6 +9,28 @@
   , "description": "Update interval"
   }
 
+, "maxNumberOfJobs":
+  { "type": "spinbutton"
+  , "default": 15
+  , "min": 1
+  , "max": 100
+  , "units": "jobs"
+  , "step": 1
+  , "description": "Maximum number of jobs displayed in the popup menu"
+  }
+
+, "hideSuccessfulJobs":
+  { "type": "checkbox"
+  , "default": false
+  , "description": "Hide successful jobs in the popup menu"
+  }
+
+, "showNotificationForFailedJobs":
+  { "type": "checkbox"
+  , "default": false
+  , "description": "Save last check and show notification for new failed jobs"
+  }
+
 , "sslStrict":
   { "type": "checkbox"
   , "default": true
