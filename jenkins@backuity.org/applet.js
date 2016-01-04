@@ -68,7 +68,6 @@ MyApplet.prototype = {
         this.set_applet_tooltip(_('Jenkins status'));
 
         this.lastCheckJobSuccess = new Map();
-        this.lastCheckJobSuccess.set('paratus.install.new.shop', true);
 
         this.assignMessageSource();
 
