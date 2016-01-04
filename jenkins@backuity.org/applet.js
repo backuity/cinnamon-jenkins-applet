@@ -32,11 +32,13 @@ const JENKINS_USERNAME = 'jenkinsUsername'
 const JENKINS_PASSWORD = 'jenkinsPassword'
 const JENKINS_MAX_NUMBER_OF_JOBS = 'maxNumberOfJobs'
 const JENKINS_HIDE_SUCCESSFUL_JOBS = 'hideSuccessfulJobs'
+const JENKINS_SHOW_NOTIFICATION_FOR_FAILED_JOBS = 'showNotificationForFailedJobs'
 
 const KEYS = [
   JENKINS_REFRESH_INTERVAL,
   JENKINS_MAX_NUMBER_OF_JOBS,
   JENKINS_HIDE_SUCCESSFUL_JOBS,
+  JENKINS_SHOW_NOTIFICATION_FOR_FAILED_JOBS,
   JENKINS_SSL_STRICT,
   JENKINS_URL,
   JENKINS_USERNAME,
@@ -66,7 +68,7 @@ MyApplet.prototype = {
         this.set_applet_tooltip(_('Jenkins status'));
 
         this.lastCheckJobSuccess = new Map();
-        this.lastCheckJobSuccess.set('Accumulo-1.6', true);
+        this.lastCheckJobSuccess.set('paratus.install.new.shop', true);
 
         this.assignMessageSource();
 
@@ -113,9 +115,11 @@ MyApplet.prototype = {
         }
     }
 
-    , pinFailNotification: function(jobName, color) {
-        //TODO da_re: dont use SystemNotificationSource
-        let notification = new MessageTray.Notification(this.messageSource, 'Jenkins-Job failed', 'The job ' + jobName + ', which has been successful last check, failed.', {});
+    , pinFailNotification: function(jobName) {
+        let icon = new St.Icon({ icon_name: 'dialog-error',
+                             icon_type: St.IconType.FULLCOLOR,
+                             icon_size: 36 });
+        let notification = new MessageTray.Notification(this.messageSource, 'Jenkins-Job failed', 'The job ' + jobName + ', which has been successful last check, failed.', { icon: icon });
         notification.setTransient(false);
         notification.setResident(true);
         notification.setUrgency(MessageTray.Urgency.CRITICAL);
@@ -149,7 +153,7 @@ MyApplet.prototype = {
                 }
 
                 let displayedJobs = 0;
-                for (let i = 0; i < jobs.length && displayedJobs <= maxJobs; i++) {
+                for (let i = 0; i < jobs.length && displayedJobs < maxJobs; i++) {
                     let job = jobs[i].get_object();
 
                     let color = job.get_string_member('color');
@@ -184,6 +188,10 @@ MyApplet.prototype = {
     }
 
     , displayNewlyFailedJobs: function(jobs) {
+        if (!this._showNotificationForFailedJobs) {
+            return;
+        }
+
         for (let i = 0; i < jobs.length; i ++) {
             let job = jobs[i].get_object();
 
@@ -197,7 +205,7 @@ MyApplet.prototype = {
             }
 
             if (this.lastCheckJobSuccess.has(jobName) && this.lastCheckJobSuccess.get(jobName)) {
-                this.pinFailNotification(jobname, color);
+                this.pinFailNotification(jobName);
             }
             this.lastCheckJobSuccess.set(jobName, false);
         }
