@@ -16,6 +16,9 @@ const St = imports.gi.St
 // http://developer.gnome.org/libsoup/stable/libsoup-client-howto.html
 const Soup = imports.gi.Soup
 
+const Main = imports.ui.main;
+const MessageTray = imports.ui.messageTray;
+
 const UUID = "jenkins@backuity.org"
 
 
@@ -62,6 +65,11 @@ MyApplet.prototype = {
         this.set_applet_label('...');
         this.set_applet_tooltip(_('Jenkins status'));
 
+        this.lastCheckJobSuccess = new Map();
+        this.lastCheckJobSuccess.set('Accumulo-1.6', true);
+
+        this.assignMessageSource();
+
         // bind settings
         //----------------------------------
 
@@ -98,6 +106,22 @@ MyApplet.prototype = {
         }))
       }
 
+    , assignMessageSource: function() {
+        if (!this.messageSource) {
+            this.messageSource = new MessageTray.SystemNotificationSource();
+            if (Main.messageTray) Main.messageTray.add(this.messageSource);
+        }
+    }
+
+    , pinFailNotification: function(jobName, color) {
+        //TODO da_re: dont use SystemNotificationSource
+        let notification = new MessageTray.Notification(this.messageSource, 'Jenkins-Job failed', 'The job ' + jobName + ', which has been successful last check, failed.', {});
+        notification.setTransient(false);
+        notification.setResident(true);
+        notification.setUrgency(MessageTray.Urgency.CRITICAL);
+        this.messageSource.notify(notification);
+    }
+
     , on_applet_clicked: function() {
         this.menu.toggle();
     }
@@ -112,10 +136,9 @@ MyApplet.prototype = {
         this.loadJsonAsync(this.jenkinsUrl(), function(json) {  
             applet.destroyMenu();          
             try {
-                let maxJobConfig = applet._maxNumberOfJobs;
+                let maxJobs = applet._maxNumberOfJobs;
                 let hideSuccessfulJobs = applet._hideSuccessfulJobs;
                 let jobs = json.get_array_member('jobs').get_elements();
-                let maxJobs = Math.min(jobs.length, maxJobConfig);
                 let success = applet.countSuccesses(jobs);
                 let failure = jobs.length - success;
 
@@ -142,6 +165,8 @@ MyApplet.prototype = {
                     applet.menu.addMenuItem(new JobMenuItem(jobName, success, url));
                     displayedJobs++;
                 }
+
+                applet.displayNewlyFailedJobs(jobs);
                 
             } catch(error) {
                 applet.set_applet_icon_name('jenkins-grey');
@@ -155,6 +180,26 @@ MyApplet.prototype = {
             Mainloop.timeout_add_seconds(this._refreshInterval, Lang.bind(this, function() {
                 this.refreshBuildStatuses(true)
             }))
+        }
+    }
+
+    , displayNewlyFailedJobs: function(jobs) {
+        for (let i = 0; i < jobs.length; i ++) {
+            let job = jobs[i].get_object();
+
+            let color = job.get_string_member('color');
+            let success = this.isColorSuccess(color);
+            let jobName = job.get_string_member('name');
+
+            if (success) {
+                this.lastCheckJobSuccess.set(jobName, true);
+                continue;
+            }
+
+            if (this.lastCheckJobSuccess.has(jobName) && this.lastCheckJobSuccess.get(jobName)) {
+                this.pinFailNotification(jobname, color);
+            }
+            this.lastCheckJobSuccess.set(jobName, false);
         }
     }
 
