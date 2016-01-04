@@ -67,7 +67,7 @@ MyApplet.prototype = {
         this.set_applet_label('...');
         this.set_applet_tooltip(_('Jenkins status'));
 
-        this.lastCheckJobSuccess = new Map();
+        this.lastCheckJobSuccess = {};
 
         this.assignMessageSource();
 
@@ -199,14 +199,14 @@ MyApplet.prototype = {
             let jobName = job.get_string_member('name');
 
             if (success) {
-                this.lastCheckJobSuccess.set(jobName, true);
+                this.lastCheckJobSuccess[jobName] = true;
                 continue;
             }
 
-            if (this.lastCheckJobSuccess.has(jobName) && this.lastCheckJobSuccess.get(jobName)) {
+            if (jobName in this.lastCheckJobSuccess && this.lastCheckJobSuccess[jobName]) {
                 this.pinFailNotification(jobName);
             }
-            this.lastCheckJobSuccess.set(jobName, false);
+            this.lastCheckJobSuccess[jobName] = false;
         }
     }
 
