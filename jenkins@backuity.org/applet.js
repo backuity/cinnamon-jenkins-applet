@@ -144,16 +144,9 @@ MyApplet.prototype = {
                 let maxJobs = applet._maxNumberOfJobs;
                 let hideSuccessfulJobs = applet._hideSuccessfulJobs;
                 let jobs = json.get_array_member('jobs').get_elements();
-                let success = applet.countSuccesses(jobs);
-                let failure = jobs.length - success;
-
-                applet.updateAppletLabel(failure, success);
-
-                if (success < jobs.length) {
-                    applet.set_applet_icon_name('jenkins-red');
-                }
-
                 let displayedJobs = 0;
+                
+                let filteredJobs = [];            
                 for (let i = 0; i < jobs.length && displayedJobs < maxJobs; i++) {
                     let job = jobs[i].get_object();
 
@@ -168,12 +161,24 @@ MyApplet.prototype = {
                     let url = job.get_string_member('url');
                     
                     if(jobName.indexOf(this._jenkinsFilter) > -1) {
+                        filteredJobs.push(jobs[i]);
                         applet.menu.addMenuItem(new JobMenuItem(jobName, success, url));
                         displayedJobs++;
                     }
                 }
+                let success = applet.countSuccesses(filteredJobs);
+                let failure = filteredJobs.length - success;
 
-                applet.displayNewlyFailedJobs(jobs);
+                applet.updateAppletLabel(failure, success);
+
+                if (success < filteredJobs.length) {
+                    applet.set_applet_icon_name('jenkins-red');
+                } else {
+                    applet.set_applet_icon_name('jenkins-green');
+                }
+                
+
+                applet.displayNewlyFailedJobs(filteredJobs);
                 
             } catch(error) {
                 applet.set_applet_icon_name('jenkins-grey');
