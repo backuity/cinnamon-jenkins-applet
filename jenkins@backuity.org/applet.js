@@ -28,6 +28,7 @@ const UUID = "jenkins@backuity.org"
 const JENKINS_REFRESH_INTERVAL = 'refreshInterval'
 const JENKINS_SSL_STRICT = 'sslStrict'
 const JENKINS_URL = 'jenkinsUrl'
+const JENKINS_FILTER = 'jenkinsFilter'
 const JENKINS_USERNAME = 'jenkinsUsername'
 const JENKINS_PASSWORD = 'jenkinsPassword'
 const JENKINS_MAX_NUMBER_OF_JOBS = 'maxNumberOfJobs'
@@ -41,6 +42,7 @@ const KEYS = [
   JENKINS_SHOW_NOTIFICATION_FOR_FAILED_JOBS,
   JENKINS_SSL_STRICT,
   JENKINS_URL,
+  JENKINS_FILTER,
   JENKINS_USERNAME,
   JENKINS_PASSWORD
 ]
@@ -163,10 +165,12 @@ MyApplet.prototype = {
                     }
 
                     let jobName = job.get_string_member('name');
-                    let url = job.get_string_member('url');  
-
-                    applet.menu.addMenuItem(new JobMenuItem(jobName, success, url));
-                    displayedJobs++;
+                    let url = job.get_string_member('url');
+                    
+                    if(jobName.indexOf(this._jenkinsFilter) > -1) {
+                        applet.menu.addMenuItem(new JobMenuItem(jobName, success, url));
+                        displayedJobs++;
+                    }
                 }
 
                 applet.displayNewlyFailedJobs(jobs);

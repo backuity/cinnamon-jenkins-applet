@@ -42,6 +42,12 @@
   , "default": ""
   , "description": "Jenkins URL (ex: https://jenkins.mydomain.com)"
   }
+  
+, "jenkinsFilter": 
+  { "type": "entry"
+  , "default": ""
+  , "description": "Project filtering"
+  }
  
 , "jenkinsUsername": 
   { "type": "entry"
