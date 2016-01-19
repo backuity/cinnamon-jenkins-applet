@@ -160,7 +160,8 @@ MyApplet.prototype = {
                     let jobName = job.get_string_member('name');
                     let url = job.get_string_member('url');
                     
-                    if(jobName.indexOf(this._jenkinsFilter) > -1) {
+                    var regex = RegExp(this._jenkinsFilter);
+                    if(regex.exec(jobName)) {
                         filteredJobs.push(jobs[i]);
                         applet.menu.addMenuItem(new JobMenuItem(jobName, success, url));
                         displayedJobs++;
