@@ -9,9 +9,7 @@ in the jenkins URL.
 
 You can filter the whole Jenkins job list by entering a regular expression matching one or several projects.
 
-For example: 
-
-```(PROJET_A-*)|PROJECT_B```
+For example: (PROJET_A-*)|PROJECT_B
 
 Here you can see a snapshot of the configuration panel:
 
