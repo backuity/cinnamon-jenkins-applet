@@ -28,6 +28,7 @@ const UUID = "jenkins@backuity.org"
 const JENKINS_REFRESH_INTERVAL = 'refreshInterval'
 const JENKINS_SSL_STRICT = 'sslStrict'
 const JENKINS_URL = 'jenkinsUrl'
+const JENKINS_FILTER = 'jenkinsFilter'
 const JENKINS_USERNAME = 'jenkinsUsername'
 const JENKINS_PASSWORD = 'jenkinsPassword'
 const JENKINS_MAX_NUMBER_OF_JOBS = 'maxNumberOfJobs'
@@ -41,6 +42,7 @@ const KEYS = [
   JENKINS_SHOW_NOTIFICATION_FOR_FAILED_JOBS,
   JENKINS_SSL_STRICT,
   JENKINS_URL,
+  JENKINS_FILTER,
   JENKINS_USERNAME,
   JENKINS_PASSWORD
 ]
@@ -142,16 +144,9 @@ MyApplet.prototype = {
                 let maxJobs = applet._maxNumberOfJobs;
                 let hideSuccessfulJobs = applet._hideSuccessfulJobs;
                 let jobs = json.get_array_member('jobs').get_elements();
-                let success = applet.countSuccesses(jobs);
-                let failure = jobs.length - success;
-
-                applet.updateAppletLabel(failure, success);
-
-                if (success < jobs.length) {
-                    applet.set_applet_icon_name('jenkins-red');
-                }
-
                 let displayedJobs = 0;
+                
+                let filteredJobs = [];            
                 for (let i = 0; i < jobs.length && displayedJobs < maxJobs; i++) {
                     let job = jobs[i].get_object();
 
@@ -163,13 +158,28 @@ MyApplet.prototype = {
                     }
 
                     let jobName = job.get_string_member('name');
-                    let url = job.get_string_member('url');  
-
-                    applet.menu.addMenuItem(new JobMenuItem(jobName, success, url));
-                    displayedJobs++;
+                    let url = job.get_string_member('url');
+                    
+                    var regex = RegExp(this._jenkinsFilter);
+                    if(regex.exec(jobName)) {
+                        filteredJobs.push(jobs[i]);
+                        applet.menu.addMenuItem(new JobMenuItem(jobName, success, url));
+                        displayedJobs++;
+                    }
                 }
+                let success = applet.countSuccesses(filteredJobs);
+                let failure = filteredJobs.length - success;
 
-                applet.displayNewlyFailedJobs(jobs);
+                applet.updateAppletLabel(failure, success);
+
+                if (success < filteredJobs.length) {
+                    applet.set_applet_icon_name('jenkins-red');
+                } else {
+                    applet.set_applet_icon_name('jenkins-green');
+                }
+                
+
+                applet.displayNewlyFailedJobs(filteredJobs);
                 
             } catch(error) {
                 applet.set_applet_icon_name('jenkins-grey');
