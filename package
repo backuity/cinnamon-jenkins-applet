@@ -1,0 +1,4 @@
+#!/bin/bash
+
+rm -f applet.zip
+zip -r applet.zip jenkins@backuity.org
