@@ -100,13 +100,6 @@ MyApplet.prototype = {
         this.menuManager.addMenu(this.menu);
 
         this.menu.addMenuItem(new PopupMenu.PopupMenuItem(_('Loading jobs...')));
-
-        //------------------------------
-        // run
-        //------------------------------
-        Mainloop.timeout_add_seconds(3, Lang.bind(this, function mainloopTimeout() {
-          this.refreshBuildStatuses(true)
-        }))
       }
 
     , assignMessageSource: function() {
@@ -131,11 +124,27 @@ MyApplet.prototype = {
         this.menu.toggle();
     }
 
+    , on_applet_added_to_panel: function() {
+        this.running = true;
+        Mainloop.timeout_add_seconds(3, Lang.bind(this, function mainloopTimeout() {
+          this.refreshBuildStatuses(true)
+        }))
+
+    }
+
+    , on_applet_removed_from_panel: function() {
+        this.running = false;
+    }
+
     , refreshAndRebuild: function() {
         refreshBuildStatuses(false);
     }
 
     , refreshBuildStatuses: function(recurse) {
+        if (!this.running) {
+            return;
+        }
+
         log("Loading " + this.jenkinsUrl());
         let applet = this;
         this.loadJsonAsync(this.jenkinsUrl(), function(json) {  
