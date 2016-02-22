@@ -1,3 +1,7 @@
+## Version 1.2.1 (22/02/2016)
+
+* Fix [#4](https://github.com/backuity/cinnamon-jenkins-applet/issues/4): Server polling keeps going after the applet has been removed (Aki Koskinen)
+
 ## Version 1.2.0 (20/01/2016)
 
 * Add job filtering with a reg-exp (@cabreracanal)
