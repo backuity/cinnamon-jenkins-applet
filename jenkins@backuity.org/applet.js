@@ -281,17 +281,24 @@ MyApplet.prototype = {
         _httpSession.ssl_strict = this._sslStrict;
         _httpSession.queue_message(message, function soupQueue(session, message) {
           
-          if( message.status_code != 200 ) {
-            logError("Got status " + message.status_code + " " + message.response_body.data);
-            applet.destroyMenu();
-            applet.set_applet_label('!');
-            applet.set_applet_icon_name('jenkins-grey');
-            applet.menu.addMenuItem(new PopupMenu.PopupMenuItem(message.response_body.data));
-          } else {
-              let jp = new Json.Parser()
-              jp.load_from_data(message.response_body.data, -1)
-              callback.call(applet, jp.get_root().get_object())
-          }
+            if( message.status_code != 200 ) {
+                logError("Got status " + message.status_code + " " + message.response_body.data);
+                applet.destroyMenu();
+                applet.set_applet_label('!');
+                applet.set_applet_icon_name('jenkins-grey');
+
+                let errorMsg = message.reason_phrase || '';
+                if( message.reason_phrase && message.response_body.data ) {
+                    errorMsg += '\n\n';
+                }
+                errorMsg += message.response_body.data || '';
+                errorMsg = errorMsg || _('Unknown error');
+                applet.menu.addMenuItem(new PopupMenu.PopupMenuItem(errorMsg));
+            } else {
+                let jp = new Json.Parser()
+                jp.load_from_data(message.response_body.data, -1)
+                callback.call(applet, jp.get_root().get_object())
+            }
         })
     }
 };
