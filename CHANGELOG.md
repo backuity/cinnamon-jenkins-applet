@@ -1,3 +1,8 @@
+## Version 1.3.0 (23/02/2016)
+
+* Fix [#5](https://github.com/backuity/cinnamon-jenkins-applet/issues/4): Support authentication with API token (Aki Koshinen)
+* Better error message (Aki Koshinen)
+
 ## Version 1.2.1 (22/02/2016)
 
 * Fix [#4](https://github.com/backuity/cinnamon-jenkins-applet/issues/4): Server polling keeps going after the applet has been removed (Aki Koskinen)
