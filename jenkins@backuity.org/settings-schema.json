@@ -49,15 +49,20 @@
   , "description": "Project filtering"
   }
  
+, "credentials":
+  { "type": "header"
+  , "description": "Credentials (if access is resticted)"
+  }
+ 
 , "jenkinsUsername": 
   { "type": "entry"
   , "default": ""
-  , "description": "Username (if access is restricted)"
+  , "description": "Username"
   }  
 
 , "jenkinsPassword": 
   { "type": "entry"
   , "default": ""
-  , "description": "Password (if access is restricted)"
+  , "description": "Password/API token"
   }    
 }

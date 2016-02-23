@@ -4,6 +4,7 @@ const Util = imports.misc.util;
 const Lang = imports.lang
 // http://developer.gnome.org/glib/unstable/glib-The-Main-Event-Loop.html
 const Mainloop = imports.mainloop
+const GLib = imports.gi.GLib;
 const Gtk = imports.gi.Gtk
 const Json = imports.gi.Json
 
@@ -278,6 +279,10 @@ MyApplet.prototype = {
     , loadJsonAsync: function(url, callback) {
         let applet = this;
         let message = Soup.Message.new('GET', url);
+        if (this._jenkinsUsername && this._jenkinsPassword) {
+          let encoded = GLib.base64_encode(this._jenkinsUsername + ':' + this._jenkinsPassword);
+          message.request_headers.append('Authorization', 'Basic ' + encoded);
+        }
         _httpSession.ssl_strict = this._sslStrict;
         _httpSession.queue_message(message, function soupQueue(session, message) {
           
