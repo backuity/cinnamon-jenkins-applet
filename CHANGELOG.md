@@ -1,3 +1,7 @@
+## Version 1.3.1 (09/03/2017)
+
+* Handle other build statuses from Jenkins, such as disabled and aborted (Vitalii Lysov)
+
 ## Version 1.3.0 (23/02/2016)
 
 * Fix [#5](https://github.com/backuity/cinnamon-jenkins-applet/issues/4): Support authentication with API token (Aki Koshinen)
