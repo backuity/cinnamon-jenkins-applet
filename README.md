@@ -1,4 +1,8 @@
-# cinnamon-jenkins-applet
+# cinnamon-jenkins-applet - NO LONGER MAINTAINED HERE!
+
+It's now part of the applet mono-repo: https://github.com/linuxmint/cinnamon-spices-applets/tree/master/jenkins%40backuity.org
+
+---------
 
 A Cinnamon applet that shows jenkins jobs.
 
